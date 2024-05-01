@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-    "encoding/json"
+	"encoding/json"
 	"fmt"
 	"github.com/vderic/kite-client-go"
-	"github.com/vderic/kite-client-go/xrg"
 	"github.com/vderic/kite-client-go/client"
+	"github.com/vderic/kite-client-go/xrg"
 	"io"
 	"os"
 	"reflect"
@@ -17,12 +17,19 @@ import (
 
 func main() {
 
-    //spec := kite.ParquetFileSpec{kite.FileSpec{"parquet"}}
-    spec := kite.CsvFileSpec{kite.FileSpec{"csv"}, ",", "\"", "\"", "", false}
+	spec := kite.ParquetFileSpec{"parquet"}
+	//spec := kite.CsvFileSpec{"csv", ",", "\"", "\"", "", false}
 
-    js, err := json.Marshal(spec)
+	schema := []kite.Coldef{{Name: "col1", Type: "int8"}, {Name: "col2", Type: "fp32", Precision: 1, Scale: 2}}
 
-    fmt.Println(string(js))
+	sql := "select * from table"
+
+	fragment := [2]int{0, 4}
+	request := kite.Request{schema, sql, fragment, spec}
+
+	js, err := json.Marshal(request)
+
+	fmt.Println(string(js))
 
 	ptyp := xrg.XRG_PTYP_INT8
 	ltyp := xrg.XRG_LTYP_ARRAY
@@ -31,7 +38,7 @@ func main() {
 
 	fmt.Println("typ = ", typ)
 
-    fmt.Println(client.KITE_MESSAGE_KIT1)
+	fmt.Println(client.KITE_MESSAGE_KIT1)
 
 	file, err := os.Open("data/gpdb0_0.xrg")
 	if err != nil {
