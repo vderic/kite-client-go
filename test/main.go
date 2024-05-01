@@ -10,6 +10,7 @@ import (
 	"github.com/vderic/kite-client-go/client"
 	"github.com/vderic/kite-client-go/xrg"
 	"io"
+	"io/ioutil"
 	"os"
 	"reflect"
 	"unsafe"
@@ -20,7 +21,22 @@ func main() {
 	spec := kite.ParquetFileSpec{"parquet"}
 	//spec := kite.CsvFileSpec{"csv", ",", "\"", "\"", "", false}
 
-	schema := []kite.Coldef{{Name: "col1", Type: "int8"}, {Name: "col2", Type: "fp32", Precision: 1, Scale: 2}}
+	//schema := []kite.Coldef{{Name: "col1", Type: "int8"}, {Name: "col2", Type: "fp32", Precision: 1, Scale: 2}}
+
+	jfile, err := os.Open("data/gpdb0.schema")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	bv, err := ioutil.ReadAll(jfile)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var schema []kite.Coldef
+	json.Unmarshal(bv, &schema)
 
 	sql := "select * from table"
 
