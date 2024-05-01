@@ -21,7 +21,7 @@ func main() {
 
     js, err := json.Marshal(spec)
 
-    fmt.Println(js)
+    fmt.Println(string(js))
 
 	ptyp := xrg.XRG_PTYP_INT8
 	ltyp := xrg.XRG_LTYP_ARRAY
@@ -32,7 +32,7 @@ func main() {
 
     fmt.Println(client.KITE_MESSAGE_KIT1)
 
-	file, err := os.Open("../data/gpdb0_0.xrg")
+	file, err := os.Open("data/gpdb0_0.xrg")
 	if err != nil {
 		fmt.Println(err)
 		return
