@@ -7,7 +7,9 @@ import (
 	"github.com/vderic/kite-client-go/xrg"
 )
 
-type FileSpec interface{}
+type FileSpec interface {
+	x()
+}
 
 type CsvFileSpec struct {
 	Fmt        string `json:"fmt"`
@@ -18,9 +20,13 @@ type CsvFileSpec struct {
 	HeaderLine bool   `json:"header_line"`
 }
 
+func (s CsvFileSpec) x() {}
+
 type ParquetFileSpec struct {
 	Fmt string `json:"fmt"`
 }
+
+func (s ParquetFileSpec) x() {}
 
 type Coldef struct {
 	Name      string `json:"name"`
