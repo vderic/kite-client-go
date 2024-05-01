@@ -31,8 +31,8 @@ func (s ParquetFileSpec) x() {}
 type Coldef struct {
 	Name      string `json:"name"`
 	Type      string `json:"type"`
-	Precision int    `json:"precision"`
-	Scale     int    `json:"scale"`
+	Precision int    `json:"precision,omitempty"`
+	Scale     int    `json:"scale,omitempty"`
 }
 
 type Schema struct {
