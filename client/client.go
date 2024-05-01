@@ -6,11 +6,11 @@ import (
 	"strconv"
 )
 
-var KITE_MESSAGE_KIT1 = []byte("KIT1")
-var KITE_MESSAGE_JSON = []byte("JSON")
-var KITE_MESSAGE_BYE = []byte("BYE_")
-var KITE_MESSAGE_ERROR = []byte("ERR_")
-var KITE_MESSAGE_VECTOR = []byte("VEC_")
+var KITE_MESSAGE_KIT1 = [4]byte{'K', 'I', 'T', '1'}
+var KITE_MESSAGE_JSON = [4]byte{'J', 'S', 'O', 'N'}
+var KITE_MESSAGE_BYE = [4]byte{'B', 'Y', 'E', '_'}
+var KITE_MESSAGE_ERROR = [4]byte{'E', 'R', 'R', '_'}
+var KITE_MESSAGE_VECTOR = [4]byte{'V', 'E', 'C', '_'}
 
 type KiteMessage struct {
 	Msgty  [4]byte
