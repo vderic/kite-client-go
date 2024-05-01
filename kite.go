@@ -1,8 +1,9 @@
 package kite
 
 import (
-    //"fmt"
+    "fmt"
     //"encoding/json"
+    "github.com/vderic/kite-client-go/xrg"
 )
 
 type FileSpec struct {
@@ -11,14 +12,17 @@ type FileSpec struct {
 
 type CsvFileSpec struct {
     FileSpec 
-    Delim byte `json:"delim"`
-    Quote byte `json:"quote"`
-    Escape byte `json:"escape"`
-    Nullstr byte `json:"nullstr"`
-    HeaderLine bool `json:"header"`
+    Delim string `json:"delim"`
+    Quote string `json:"quote"`
+    Escape string `json:"escape"`
+    Nullstr string `json:"nullstr"`
+    HeaderLine bool `json:"header_line"`
 }
 
 type ParquetFileSpec struct {
     FileSpec
 }
 
+func test() {
+    fmt.Println(xrg.XRG_PTYP_INT8)
+}

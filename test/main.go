@@ -17,7 +17,8 @@ import (
 
 func main() {
 
-    spec := kite.ParquetFileSpec{kite.FileSpec{"parquet"}}
+    //spec := kite.ParquetFileSpec{kite.FileSpec{"parquet"}}
+    spec := kite.CsvFileSpec{kite.FileSpec{"csv"}, ",", "\"", "\"", "", false}
 
     js, err := json.Marshal(spec)
 

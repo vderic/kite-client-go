@@ -4,7 +4,7 @@ MKFILE_DIR := $(dir $(MKFILE_PATH))
 #REV := $(shell git rev-parse --short HEAD)
 
 all:
-	# go mod init github.com/vderic/kite-client-sdk/golang/kite
+	# go mod init github.com/vderic/kite-client-go
 	# go mod tidy
 	go get .
 	go build .
