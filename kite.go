@@ -132,8 +132,8 @@ func (c *KiteClient) searchSockStream(conn net.Conn) *client.SockStream {
 
 func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 
+	var x xrg.Iterator
 	if len(c.pages) != 0 {
-		var x xrg.Iterator
 		x, c.pages = c.pages[0], c.pages[1:]
 		return &x, nil
 	}
@@ -189,7 +189,6 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 		return nil, nil
 	}
 
-	var x xrg.Iterator
 	x, c.pages = c.pages[0], c.pages[1:]
 	return &x, nil
 }
