@@ -36,13 +36,14 @@ func main() {
 	sql := "select * from \"tmp/gpdb/gpdb*.parquet\""
 
 	cli := kite.NewKiteClient()
-	cli.Schema(schema).Sql(sql).Fragment(0, 3).FileSpec(spec).Host(hosts)
+	cli.Schema(schema).Sql(sql).Fragment(-1, 3).FileSpec(spec).Host(hosts)
 	err = cli.Submit()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	n := 0
 	for {
 		it, err := cli.NextRow()
 		if err != nil {
@@ -50,7 +51,7 @@ func main() {
 		}
 		if it == nil {
 			// done
-			return
+			break
 		}
 
 		for i := 0; i < it.Nvec; i++ {
@@ -60,5 +61,9 @@ func main() {
 			fmt.Print(it.Value[i])
 		}
 		fmt.Print("\n")
+		n++
 	}
+
+	fmt.Println("#rows = ", n)
+	cli.Close()
 }
