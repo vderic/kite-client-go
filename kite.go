@@ -50,7 +50,7 @@ type Request struct {
 
 type KiteClient struct {
 	request Request
-	sss     []client.SockStream
+	sss     map[uintptr]client.SockStream
 	poller  *epoller.Epoll
 }
 
@@ -85,6 +85,15 @@ func (c *KiteClient) getPage(sock client.SockStream) (p []xrg.Vector, err error)
 	return p, nil
 }
 
+func getFd(conn net.Conn) (uintptr, error) {
+	file, err := conn.(*net.TCPConn).File()
+	if err != nil {
+		return 0, err
+	}
+	fd := file.Fd()
+	return fd, nil
+}
+
 func (c *KiteClient) submit() error {
 
 	var err error = nil
@@ -93,9 +102,15 @@ func (c *KiteClient) submit() error {
 		return err
 	}
 
-	sss := make([]client.SockStream, 3)
+	var conn net.Conn
+	fd, err := getFd(conn)
+	if err != nil {
+		return err
+	}
 
-	for _, ss := range sss {
+	c.sss[fd] = client.SockStream{conn}
+
+	for _, ss := range c.sss {
 		c.poller.Add(ss.Conn)
 	}
 
@@ -103,39 +118,59 @@ func (c *KiteClient) submit() error {
 }
 
 func (c *KiteClient) searchSockStream(conn net.Conn) *client.SockStream {
-	for _, ss := range c.sss {
-		if ss.Conn == conn {
-			return &ss
-		}
+	fd, err := getFd(conn)
+	if err != nil {
+		return nil
+	}
+
+	if s, ok := c.sss[fd]; ok {
+		return &s
 	}
 	return nil
 }
 
-func (c *KiteClient) Next() error {
-
-	conns, err := c.poller.Wait(1)
-	if err != nil {
-		return err
-	}
-
-	for _, connection := range conns {
-		pss := c.searchSockStream(connection)
-		if pss == nil {
-			err = fmt.Errorf("sockstream not found.")
-			return err
+func (c *KiteClient) nextPage() (it xrg.Iterator, err error) {
+	for {
+		if len(c.sss) == 0 {
+			break
 		}
 
-		page, err := c.getPage(*pss)
+		conns, err := c.poller.Wait(1)
 		if err != nil {
-			return err
+			return it, err
 		}
 
-		if page == nil {
-			c.poller.Remove(connection)
+		for _, connection := range conns {
+			pss := c.searchSockStream(connection)
+			if pss == nil {
+				err = fmt.Errorf("sockstream not found.")
+				return it, err
+			}
+
+			page, err := c.getPage(*pss)
+			if err != nil {
+				/*
+					            if err == io.EOF || errors.Is(err, net.ErrClosed) {
+					                c.poller.Remove(sock.Conn)
+					            } else {
+								    return err
+					            }
+				*/
+				return it, err
+			}
+
+			if page == nil {
+				c.poller.Remove(connection)
+				(*pss).Close()
+				fd, _ := getFd(connection)
+				delete(c.sss, fd)
+			}
+
+			// TODO: push to the list
 		}
 	}
 
-	return nil
+	return it, err
 }
 
 func (c *KiteClient) Close() {
