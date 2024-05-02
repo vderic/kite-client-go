@@ -2,7 +2,6 @@ kite-client-go is the kite client for golang
 
 
 ```
-func main() {
 
     // kite://localhost:7878/tmp/gpdb/gpdb*.parquet
     hosts := []string{"localhost:7878"}
