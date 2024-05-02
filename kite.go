@@ -158,7 +158,7 @@ func (c *KiteClient) Submit() error {
 	if c.fragid == -1 {
 		for i := 0; i < c.fragcnt; i++ {
 			req := c.request
-			req.Fragment = [2]int{c.fragid, c.fragcnt}
+			req.Fragment = [2]int{i, c.fragcnt}
 			requests = append(requests, req)
 		}
 	} else {
