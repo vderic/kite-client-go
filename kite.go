@@ -246,14 +246,11 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 				c.poller.Remove(connection)
 				ss.Close()
 				delete(c.sss, fd)
+			} else {
+				// push to the list
+				iter := xrg.NewIterator(page)
+				c.pages = append(c.pages, iter)
 			}
-
-			// TODO: push to the list
-			iter := xrg.NewIterator(page)
-			if err != nil {
-				return it, err
-			}
-			c.pages = append(c.pages, iter)
 		}
 	}
 
