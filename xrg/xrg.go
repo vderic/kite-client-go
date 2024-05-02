@@ -137,6 +137,15 @@ type ArrayType struct {
 	Values    []any
 }
 
+func NewArrayType(dataptr uintptr, precision int16, scale int16) (ArrayType, error) {
+	var a ArrayType
+	err := a.Read(dataptr, precision, scale)
+	if err != nil {
+		return a, err
+	}
+	return a, nil
+}
+
 func (arr *ArrayType) Read(dataptr uintptr, precision int16, scale int16) error {
 
 	arr.Precision = precision
@@ -288,6 +297,15 @@ type Vector struct {
 	Flag   []byte
 }
 
+func NewVector(b []byte) (Vector, error) {
+	var v Vector
+	err := v.Read(b)
+	if err != nil {
+		return v, err
+	}
+	return v, nil
+}
+
 func (v *Vector) Read(b []byte) error {
 	err := v.Header.Read(b[0:XRG_HEADER_SIZE])
 	if err != nil {
@@ -324,7 +342,8 @@ type Iterator struct {
 	curr         int64
 }
 
-func (iter *Iterator) Create(vec []Vector) error {
+func NewIterator(vec []Vector) Iterator {
+	var iter Iterator
 	iter.Nvec = len(vec)
 	iter.Vec = vec
 	iter.curr = -1
@@ -344,7 +363,7 @@ func (iter *Iterator) Create(vec []Vector) error {
 	}
 	iter.Nitem = iter.Header[0].Nitem
 
-	return nil
+	return iter
 }
 
 func PointerGetValue(ptr uintptr, ptyp PhysicalType, ltyp LogicalType, itemsz int16, precision int16, scale int16) (any, error) {
@@ -389,8 +408,7 @@ func PointerGetValue(ptr uintptr, ptyp PhysicalType, ltyp LogicalType, itemsz in
 			s := string(unsafe.Slice((*byte)(unsafe.Pointer(dataptr)), sz))
 			return s, err
 		} else {
-			var arr ArrayType
-			err = arr.Read(dataptr, precision, scale)
+			arr, err := NewArrayType(dataptr, precision, scale)
 			if err != nil {
 				return nil, err
 			}

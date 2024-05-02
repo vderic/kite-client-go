@@ -114,14 +114,7 @@ func main() {
 		pint64off += 8
 	}
 
-	var it xrg.Iterator
-
-	err = it.Create(vec)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
+	it := xrg.NewIterator(vec)
 	fmt.Println("iterator start")
 	for it.Next() {
 		fmt.Println("next")

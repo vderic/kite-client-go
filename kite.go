@@ -53,6 +53,12 @@ type KiteClient struct {
 	sss     map[uintptr]client.SockStream
 	poller  *epoller.Epoll
 	pages   []xrg.Iterator
+	curr    *xrg.Iterator
+}
+
+func NewKitClient() *KiteClient {
+	c := new(KiteClient)
+	return c
 }
 
 func (c *KiteClient) getPage(sock client.SockStream) (p []xrg.Vector, err error) {
@@ -167,8 +173,7 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 			}
 
 			// TODO: push to the list
-			var iter xrg.Iterator
-			err = iter.Create(page)
+			iter := xrg.NewIterator(page)
 			if err != nil {
 				return it, err
 			}
@@ -183,6 +188,23 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 
 	x, c.pages = c.pages[0], c.pages[1:]
 	return &x, nil
+}
+
+func (c *KiteClient) NextRow() (*xrg.Iterator, error) {
+	var err error = nil
+
+	if c.curr != nil && c.curr.Next() {
+		return c.curr, err
+	}
+
+	c.curr, err = c.nextPage()
+	if err != nil {
+		return nil, err
+	}
+	if c.curr != nil && c.curr.Next() {
+		return c.curr, err
+	}
+	return nil, err
 }
 
 func (c *KiteClient) Close() {
