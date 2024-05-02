@@ -20,6 +20,7 @@ kite-client-go is the kite client for golang
         fmt.Println(err)
         return
     }
+    defer cli.Close()
 
     n := 0
     for {
@@ -47,6 +48,5 @@ kite-client-go is the kite client for golang
     }
 
     fmt.Println("#rows = ", n)
-    cli.Close()
 
 ```

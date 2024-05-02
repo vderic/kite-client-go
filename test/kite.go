@@ -42,6 +42,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	defer cli.Close()
 
 	n := 0
 	for {
@@ -69,5 +70,4 @@ func main() {
 	}
 
 	fmt.Println("#rows = ", n)
-	cli.Close()
 }
