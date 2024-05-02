@@ -49,6 +49,7 @@ func main() {
 		it, err := cli.NextRow()
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
 		if it == nil {
 			// done

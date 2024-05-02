@@ -27,6 +27,7 @@ kite-client-go is the kite client for golang
         it, err := cli.NextRow()
         if err != nil {
             fmt.Println(err)
+            return
         }
         if it == nil {
             // no more data
