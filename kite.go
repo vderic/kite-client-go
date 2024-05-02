@@ -118,18 +118,6 @@ func (c *KiteClient) submit() error {
 	return nil
 }
 
-func (c *KiteClient) searchSockStream(conn net.Conn) *client.SockStream {
-	fd, err := getFd(conn)
-	if err != nil {
-		return nil
-	}
-
-	if s, ok := c.sss[fd]; ok {
-		return &s
-	}
-	return nil
-}
-
 func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 
 	var x xrg.Iterator
@@ -149,13 +137,18 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 		}
 
 		for _, connection := range conns {
-			pss := c.searchSockStream(connection)
-			if pss == nil {
+			fd, err := getFd(connection)
+			if err != nil {
+				return it, err
+			}
+
+			ss, ok := c.sss[fd]
+			if !ok {
 				err = fmt.Errorf("sockstream not found.")
 				return it, err
 			}
 
-			page, err := c.getPage(*pss)
+			page, err := c.getPage(ss)
 			if err != nil {
 				/*
 					            if err == io.EOF || errors.Is(err, net.ErrClosed) {
@@ -169,8 +162,7 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 
 			if page == nil {
 				c.poller.Remove(connection)
-				(*pss).Close()
-				fd, _ := getFd(connection)
+				ss.Close()
 				delete(c.sss, fd)
 			}
 
