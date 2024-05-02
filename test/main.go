@@ -40,6 +40,9 @@ func main() {
 
 	sql := "select * from table"
 
+	cli := new(kite.KiteClient)
+	cli.Schema(schema).Sql(sql).Fragment(0, 3).FileSpec(spec)
+
 	fragment := [2]int{0, 4}
 	request := kite.Request{schema, sql, fragment, spec}
 

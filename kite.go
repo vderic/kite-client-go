@@ -1,12 +1,12 @@
 package kite
 
 import (
+	"encoding/json"
 	"fmt"
-	"net"
-	//    "encoding/json"
 	"github.com/smallnest/epoller"
 	"github.com/vderic/kite-client-go/client"
 	"github.com/vderic/kite-client-go/xrg"
+	"net"
 )
 
 type FileSpec interface {
@@ -54,10 +54,40 @@ type KiteClient struct {
 	poller  *epoller.Epoll
 	pages   []xrg.Iterator
 	curr    *xrg.Iterator
+	hosts   []string
+	fragid  int
+	fragcnt int
 }
 
-func NewKitClient() *KiteClient {
+func NewKiteClient() *KiteClient {
 	c := new(KiteClient)
+	return c
+}
+
+func (c *KiteClient) Schema(schema []Coldef) *KiteClient {
+	c.request.Schema = schema
+	return c
+}
+
+func (c *KiteClient) Sql(sql string) *KiteClient {
+	c.request.Sql = sql
+	return c
+}
+
+func (c *KiteClient) Fragment(fragid, fragcnt int) *KiteClient {
+	c.fragid = fragid
+	c.fragcnt = fragcnt
+	return c
+}
+
+func (c *KiteClient) FileSpec(fspec FileSpec) *KiteClient {
+
+	c.request.Spec = fspec
+	return c
+}
+
+func (c *KiteClient) Host(hosts []string) *KiteClient {
+	c.hosts = hosts
 	return c
 }
 
@@ -78,8 +108,10 @@ func (c *KiteClient) getPage(sock client.SockStream) (p []xrg.Vector, err error)
 			if msg.Msglen == 0 {
 				break
 			} else {
-				var vec xrg.Vector
-				vec.Read(msg.Buffer)
+				vec, err := xrg.NewVector(msg.Buffer)
+				if err != nil {
+					return nil, err
+				}
 				page = append(page, vec)
 			}
 		} else {
@@ -102,23 +134,59 @@ func getFd(conn net.Conn) (uintptr, error) {
 }
 
 func (c *KiteClient) submit() error {
-
 	var err error = nil
+	var requests []Request
+
+	c.curr = nil
+
+	if c.fragcnt <= 0 {
+		err := fmt.Errorf("error: fragcnt <= 0")
+		return err
+	}
+
+	if c.fragid == -1 {
+		for i := 0; i < c.fragcnt; i++ {
+			req := c.request
+			req.Fragment = [2]int{c.fragid, c.fragcnt}
+			requests = append(requests, req)
+		}
+	} else {
+		c.request.Fragment = [2]int{c.fragid, c.fragcnt}
+		requests = append(requests, c.request)
+
+	}
+
 	c.poller, err = epoller.NewPoller(1000000)
 	if err != nil {
 		return err
 	}
 
-	var conn net.Conn
-	fd, err := getFd(conn)
-	if err != nil {
-		return err
-	}
+	for i := 0; i < len(requests); i++ {
 
-	c.sss[fd] = client.SockStream{conn}
+		// JSON request
+		js, err := json.Marshal(requests[i])
+		if err != nil {
+			return err
+		}
 
-	for _, ss := range c.sss {
-		c.poller.Add(ss.Conn)
+		n := i % len(c.hosts)
+		conn, err := net.Dial("tcp", c.hosts[n])
+		if err != nil {
+			return err
+		}
+		fd, err := getFd(conn)
+		if err != nil {
+			return err
+		}
+
+		// add to epoll
+		ss := client.SockStream{conn}
+		c.sss[fd] = ss
+		c.poller.Add(conn)
+
+		// send message
+		ss.Send(client.KITE_MESSAGE_KIT1, nil)
+		ss.Send(client.KITE_MESSAGE_JSON, js)
 	}
 
 	return nil

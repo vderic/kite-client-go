@@ -58,14 +58,14 @@ func (sock *SockStream) writefully(msg []byte, msgsz int) error {
 	return err
 }
 
-func (sock *SockStream) Send(msgty []byte, msg []byte) error {
+func (sock *SockStream) Send(msgty [4]byte, msg []byte) error {
 	msgsz := 0
 	if msg != nil {
 		msgsz = len(msg)
 	}
 
 	hex := []byte(fmt.Sprintf("%08X", msgsz))
-	meta := append(msgty, hex...)
+	meta := append(msgty[:], hex...)
 
 	err := sock.writefully(meta, len(meta))
 	if err != nil {
