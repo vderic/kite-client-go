@@ -2,7 +2,9 @@ package kite
 
 import (
 	"fmt"
+	"net"
 	//    "encoding/json"
+	"github.com/smallnest/epoller"
 	"github.com/vderic/kite-client-go/client"
 	"github.com/vderic/kite-client-go/xrg"
 )
@@ -46,73 +48,99 @@ type Request struct {
 	Spec     FileSpec `json:"filespec"`
 }
 
-func test() {
-	fmt.Println(xrg.XRG_PTYP_INT8)
-	fmt.Println(client.KITE_MESSAGE_KIT1)
+type KiteClient struct {
+	request Request
+	sss     []client.SockStream
+	poller  *epoller.Epoll
 }
 
-func recv(sss []client.SockStream) <-chan any {
-	res := make(chan any)
-	for _, ss := range sss {
-		go func(ss client.SockStream) {
+func (c *KiteClient) getPage(sock client.SockStream) (p []xrg.Vector, err error) {
+	page := make([]xrg.Vector, 0)
+	for {
+		msg, err := sock.Recv()
+		if err != nil {
+			return nil, err
+		}
 
-			for {
-				page := make([]xrg.Vector, 0)
-				for {
-					msg, err := ss.Recv()
-					if err != nil {
-						res <- err
-						return
-					}
-
-					if msg.Msgty == client.KITE_MESSAGE_BYE {
-						res <- nil
-						return
-					} else if msg.Msgty == client.KITE_MESSAGE_ERROR {
-						res <- fmt.Errorf(string(msg.Buffer[0:msg.Msglen]))
-						return
-					} else if msg.Msgty == client.KITE_MESSAGE_VECTOR {
-						if msg.Msglen == 0 {
-							break
-						} else {
-							var vec xrg.Vector
-							vec.Read(msg.Buffer)
-							page = append(page, vec)
-						}
-					} else {
-						res <- fmt.Errorf("Invalid kite message type")
-						return
-					}
-				}
-
-				res <- page
+		if msg.Msgty == client.KITE_MESSAGE_BYE {
+			return nil, nil
+		} else if msg.Msgty == client.KITE_MESSAGE_ERROR {
+			err = fmt.Errorf(string(msg.Buffer[0:msg.Msglen]))
+			return nil, err
+		} else if msg.Msgty == client.KITE_MESSAGE_VECTOR {
+			if msg.Msglen == 0 {
+				break
+			} else {
+				var vec xrg.Vector
+				vec.Read(msg.Buffer)
+				page = append(page, vec)
 			}
-		}(ss)
+		} else {
+			err = fmt.Errorf("Invalid kite message type")
+			return nil, err
+		}
 	}
 
-	return res
+	p = page
+	return p, nil
 }
 
-func submit() {
+func (c *KiteClient) submit() error {
 
-}
-
-func next() {
+	var err error = nil
+	c.poller, err = epoller.NewPoller(1000000)
+	if err != nil {
+		return err
+	}
 
 	sss := make([]client.SockStream, 3)
 
-	read := recv(sss)
+	for _, ss := range sss {
+		c.poller.Add(ss.Conn)
+	}
 
-	for msg := range read {
-		if msg == nil {
-			return
+	return nil
+}
+
+func (c *KiteClient) searchSockStream(conn net.Conn) *client.SockStream {
+	for _, ss := range c.sss {
+		if ss.Conn == conn {
+			return &ss
+		}
+	}
+	return nil
+}
+
+func (c *KiteClient) Next() error {
+
+	conns, err := c.poller.Wait(1)
+	if err != nil {
+		return err
+	}
+
+	for _, connection := range conns {
+		pss := c.searchSockStream(connection)
+		if pss == nil {
+			err = fmt.Errorf("sockstream not found.")
+			return err
 		}
 
-		switch msg.(type) {
-		case xrg.Vector:
-			break
-		case error:
-			break
+		page, err := c.getPage(*pss)
+		if err != nil {
+			return err
 		}
+
+		if page == nil {
+			c.poller.Remove(connection)
+		}
+	}
+
+	return nil
+}
+
+func (c *KiteClient) Close() {
+	c.poller.Close(false)
+	for _, ss := range c.sss {
+		ss.Close()
 	}
 }

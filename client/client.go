@@ -19,11 +19,11 @@ type KiteMessage struct {
 }
 
 type SockStream struct {
-	socket net.Conn
+	Conn net.Conn
 }
 
 func (sock *SockStream) Close() {
-	sock.socket.Close()
+	sock.Conn.Close()
 }
 
 func (sock *SockStream) readfully(msg []byte, msgsz int) error {
@@ -31,7 +31,7 @@ func (sock *SockStream) readfully(msg []byte, msgsz int) error {
 	p := 0
 	msglen := msgsz
 	for p < msgsz {
-		n, err := sock.socket.Read(msg[p:])
+		n, err := sock.Conn.Read(msg[p:])
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ func (sock *SockStream) writefully(msg []byte, msgsz int) error {
 	p := 0
 	msglen := msgsz
 	for p < msgsz {
-		n, err := sock.socket.Write(msg[p:])
+		n, err := sock.Conn.Write(msg[p:])
 		if err != nil {
 			return err
 		}
