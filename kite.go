@@ -186,9 +186,6 @@ func (c *KiteClient) Submit() error {
 			return err
 		}
 		fd := getFd(conn)
-		if err != nil {
-			return err
-		}
 
 		// add to epoll
 		ss := client.SockStream{conn}
