@@ -7,6 +7,7 @@ import (
 	"github.com/vderic/kite-client-go/client"
 	"github.com/vderic/kite-client-go/xrg"
 	"net"
+	"syscall"
 )
 
 type FileSpec interface {
@@ -50,7 +51,7 @@ type Request struct {
 
 type KiteClient struct {
 	request Request
-	sss     map[uintptr]client.SockStream
+	sss     map[int]client.SockStream
 	poller  *epoller.Epoll
 	pages   []xrg.Iterator
 	curr    *xrg.Iterator
@@ -61,6 +62,8 @@ type KiteClient struct {
 
 func NewKiteClient() *KiteClient {
 	c := new(KiteClient)
+	c.sss = make(map[int]client.SockStream)
+	c.curr = nil
 	return c
 }
 
@@ -124,16 +127,24 @@ func (c *KiteClient) getPage(sock client.SockStream) (p []xrg.Vector, err error)
 	return p, nil
 }
 
-func getFd(conn net.Conn) (uintptr, error) {
-	file, err := conn.(*net.TCPConn).File()
-	if err != nil {
-		return 0, err
+func getFd(conn net.Conn) int {
+	if con, ok := conn.(syscall.Conn); ok {
+		raw, err := con.SyscallConn()
+		if err != nil {
+			return 0
+		}
+		sfd := 0
+		raw.Control(func(fd uintptr) {
+			sfd = int(fd)
+		})
+		return sfd
+	} else if con, ok := conn.(epoller.ConnImpl); ok {
+		return con.GetFD()
 	}
-	fd := file.Fd()
-	return fd, nil
+	return 0
 }
 
-func (c *KiteClient) submit() error {
+func (c *KiteClient) Submit() error {
 	var err error = nil
 	var requests []Request
 
@@ -174,7 +185,7 @@ func (c *KiteClient) submit() error {
 		if err != nil {
 			return err
 		}
-		fd, err := getFd(conn)
+		fd := getFd(conn)
 		if err != nil {
 			return err
 		}
@@ -211,10 +222,7 @@ func (c *KiteClient) nextPage() (it *xrg.Iterator, err error) {
 		}
 
 		for _, connection := range conns {
-			fd, err := getFd(connection)
-			if err != nil {
-				return it, err
-			}
+			fd := getFd(connection)
 
 			ss, ok := c.sss[fd]
 			if !ok {
