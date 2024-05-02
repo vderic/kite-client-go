@@ -58,7 +58,11 @@ func main() {
 			if i > 0 {
 				fmt.Print(",")
 			}
-			fmt.Print(it.Value[i])
+			if it.Flag[i] != 0 {
+				fmt.Print("NULL")
+			} else {
+				fmt.Print(it.Value[i])
+			}
 		}
 		fmt.Print("\n")
 		n++
