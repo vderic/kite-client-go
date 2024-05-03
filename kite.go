@@ -11,7 +11,7 @@ import (
 )
 
 type FileSpec interface {
-	x()
+	Validate() bool
 }
 
 type CsvFileSpec struct {
@@ -23,13 +23,23 @@ type CsvFileSpec struct {
 	HeaderLine bool   `json:"header_line"`
 }
 
-func (s CsvFileSpec) x() {}
+func (s CsvFileSpec) Validate() bool {
+	if s.Fmt == "csv" {
+		return true
+	}
+	return false
+}
 
 type ParquetFileSpec struct {
 	Fmt string `json:"fmt"`
 }
 
-func (s ParquetFileSpec) x() {}
+func (s ParquetFileSpec) Validate() bool {
+	if s.Fmt == "parquet" {
+		return true
+	}
+	return false
+}
 
 type Coldef struct {
 	Name      string `json:"name"`
@@ -149,6 +159,10 @@ func (c *KiteClient) Submit() error {
 	var requests []Request
 
 	c.curr = nil
+
+	if c.request.Spec.Validate() == false {
+		return fmt.Errorf("invalid file spec")
+	}
 
 	if len(c.request.Schema) == 0 {
 		return fmt.Errorf("no schema found")
