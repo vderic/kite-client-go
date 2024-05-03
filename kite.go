@@ -165,7 +165,7 @@ func (c *KiteClient) Submit() error {
 		return fmt.Errorf("invalid SQL statement")
 	}
 
-	if c.request.Spec.Validate() == false {
+	if c.request.Spec == nil || c.request.Spec.Validate() == false {
 		return fmt.Errorf("invalid file spec")
 	}
 
