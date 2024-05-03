@@ -39,3 +39,7 @@ func (i I128) String() string {
 	b := i.AsBigInt()
 	return b.String()
 }
+
+func (i I128) GetHiLo() (hi uint64, lo uint64) {
+	return i.array[1], i.array[0]
+}
