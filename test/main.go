@@ -21,8 +21,8 @@ func main() {
 	// kite://localhost:7878/tmp/gpdb/gpdb*.parquet
 	//hosts := []string{"localhost:7878"}
 
-	spec := kite.ParquetFileSpec{"parquet"}
-	//spec := kite.CsvFileSpec{"csv", ",", "\"", "\"", "", false}
+	spec := kite.NewParquetFileSpec()
+	//spec := kite.NewCsvFileSpec(",", "\"", "\"", "", false)
 
 	//schema := []kite.Coldef{{Name: "col1", Type: "int8"}, {Name: "col2", Type: "fp32", Precision: 1, Scale: 2}}
 

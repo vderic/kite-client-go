@@ -27,12 +27,20 @@ func (s CsvFileSpec) Validate() bool {
 	return s.Fmt == "csv"
 }
 
+func NewCsvFileSpec(delim, quote, escape, nullstr string, header_line bool) CsvFileSpec {
+	return CsvFileSpec{"csv", delim, quote, escape, nullstr, header_line}
+}
+
 type ParquetFileSpec struct {
 	Fmt string `json:"fmt"`
 }
 
 func (s ParquetFileSpec) Validate() bool {
 	return s.Fmt == "parquet"
+}
+
+func NewParquetFileSpec() ParquetFileSpec {
+	return ParquetFileSpec{"parquet"}
 }
 
 type Coldef struct {
