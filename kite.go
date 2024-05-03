@@ -150,6 +150,16 @@ func (c *KiteClient) Submit() error {
 
 	c.curr = nil
 
+	if len(c.request.Schema) == 0 {
+		return fmt.Errorf("no schema found")
+	}
+
+	for _, col := range c.request.Schema {
+		if xrg.ValidateType(col.Type) == false {
+			return fmt.Errorf("invalid type in schema ", c)
+		}
+	}
+
 	if c.fragcnt <= 0 {
 		err := fmt.Errorf("error: fragcnt <= 0")
 		return err

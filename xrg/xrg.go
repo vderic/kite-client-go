@@ -56,6 +56,20 @@ const (
 	XRG_LTYP_MAX       LogicalType = 8
 )
 
+var XRG_TYPES = []string{"int8", "int16", "int32", "int64", "float", "double", "decimal",
+	"string", "interval", "time", "date", "timestamp",
+	"int8[]", "int16[]", "int32[]", "int64[]", "float[]", "double[]", "decimal[]",
+	"string[]", "interval[]", "time[]", "date[]", "timestamp[]"}
+
+func ValidateType(typ string) bool {
+	for _, s := range XRG_TYPES {
+		if typ == s {
+			return true
+		}
+	}
+	return false
+}
+
 func XRG_LTYP_PTYP(ltyp LogicalType, ptyp PhysicalType) int32 {
 	return (int32(ltyp) << 16) | int32(ptyp)
 }
