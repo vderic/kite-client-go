@@ -1,5 +1,7 @@
 kite-client-go is the kite client for golang
 
+For other programming languages such as C, Java and Python, please visit (https://github.com/vderic/kite-client-sdk).
+
 
 ```
 
