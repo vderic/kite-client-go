@@ -7,25 +7,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/vderic/kite-client-go"
-	"github.com/vderic/kite-client-go/client"
 	"github.com/vderic/kite-client-go/xrg"
 	"io"
 	"io/ioutil"
 	"os"
-	"reflect"
+	//"reflect"
 	"unsafe"
 )
 
 func main() {
 
-	// kite://localhost:7878/tmp/gpdb/gpdb*.parquet
-	//hosts := []string{"localhost:7878"}
-
-	spec := kite.NewParquetFileSpec()
-	//spec := kite.NewCsvFileSpec(",", "\"", "\"", "", false)
-
-	//schema := []kite.Coldef{{Name: "col1", Type: "int8"}, {Name: "col2", Type: "fp32", Precision: 1, Scale: 2}}
-
+	// read schema in JSON file
 	jfile, err := os.Open("data/gpdb0.schema")
 	if err != nil {
 		fmt.Println(err)
@@ -41,24 +33,7 @@ func main() {
 	var schema []kite.Coldef
 	json.Unmarshal(bv, &schema)
 
-	sql := "select * from \"tmp/gpdb/gpdb*.parquet\""
-
-	fragment := [2]int{0, 4}
-	request := kite.Request{schema, sql, fragment, spec}
-
-	js, err := json.Marshal(request)
-
-	fmt.Println(string(js))
-
-	ptyp := xrg.XRG_PTYP_INT8
-	ltyp := xrg.XRG_LTYP_ARRAY
-
-	typ := xrg.XRG_LTYP_PTYP(ltyp, ptyp)
-
-	fmt.Println("typ = ", typ)
-
-	fmt.Println(client.KITE_MESSAGE_KIT1)
-
+	// read xrg file
 	file, err := os.Open("data/gpdb0_0.xrg")
 	if err != nil {
 		fmt.Println(err)
@@ -87,8 +62,6 @@ func main() {
 		fmt.Println("binary.Read failed:", err)
 	}
 
-	//fmt.Println("Footer Nvec", footer.Nvec)
-
 	off2 := len(bs) - 8 - int(footer.Nvec*8)
 	pint64off := uintptr(unsafe.Pointer(&bs[off2]))
 
@@ -109,12 +82,19 @@ func main() {
 	}
 
 	it := xrg.NewIterator(vec)
-	fmt.Println("iterator start")
 	for it.Next() {
-		fmt.Println("next")
 		for i := 0; i < it.Nvec; i++ {
-			fmt.Println("col ", i, ", v=", it.Value[i], reflect.TypeOf(it.Value[i]).String())
+			//fmt.Println("col ", i, ", v=", it.Value[i], reflect.TypeOf(it.Value[i]).String())
+			if i > 0 {
+				fmt.Print(",")
+			}
+			if it.Flag[i] != 0 {
+				fmt.Print("NULL")
+			} else {
+				fmt.Print(it.Value[i])
+			}
 		}
+		fmt.Print("\n")
 	}
 
 }
