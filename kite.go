@@ -161,6 +161,10 @@ func (c *KiteClient) Submit() error {
 
 	c.curr = nil
 
+	if len(c.hosts) == 0 {
+		return fmt.Errorf("no host provided")
+	}
+
 	if len(c.request.Sql) == 0 {
 		return fmt.Errorf("invalid SQL statement")
 	}
