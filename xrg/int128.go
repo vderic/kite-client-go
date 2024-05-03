@@ -2,6 +2,7 @@ package xrg
 
 import (
 	"math/big"
+	//"github.com/shabbyrobe/go-num"
 )
 
 const (
