@@ -401,7 +401,7 @@ func PointerGetValue(ptr uintptr, ptyp PhysicalType, ltyp LogicalType, itemsz in
 				interval := *(*Interval)(unsafe.Pointer(ptr))
 				return interval, err
 			} else {
-				p := (*int64)(unsafe.Pointer(ptr))
+				p := (*uint64)(unsafe.Pointer(ptr))
 				i128 := unsafe.Slice(p, 2)
 				return i128, err
 			}
