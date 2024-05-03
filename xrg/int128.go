@@ -15,19 +15,18 @@ var (
 )
 
 type I128 struct {
-	lo uint64
-	hi uint64
+	array []uint64
 }
 
 func (i I128) AsBigInt() (b *big.Int) {
 	b = new(big.Int)
-	neg := i.hi&signBit != 0
-	if i.hi > 0 {
-		b.SetUint64(i.hi)
+	neg := i.array[1]&signBit != 0
+	if i.array[1] > 0 {
+		b.SetUint64(i.array[1])
 		b.Lsh(b, 64)
 	}
 	var lo big.Int
-	lo.SetUint64(i.lo)
+	lo.SetUint64(i.array[0])
 	b.Add(b, &lo)
 
 	if neg {
