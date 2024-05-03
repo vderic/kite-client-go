@@ -14,27 +14,29 @@ var (
 	big1          = new(big.Int).SetInt64(1)
 )
 
-/*
-    0 - lo
-    1 - hi
 type I128 struct {
-    array []uint64
-)
-*/
+	lo uint64
+	hi uint64
+}
 
-func I128ToBigInt(i []uint64) (b *big.Int) {
+func (i I128) AsBigInt() (b *big.Int) {
 	b = new(big.Int)
-	neg := i[1]&signBit != 0
-	if i[1] > 0 {
-		b.SetUint64(i[1])
+	neg := i.hi&signBit != 0
+	if i.hi > 0 {
+		b.SetUint64(i.hi)
 		b.Lsh(b, 64)
 	}
 	var lo big.Int
-	lo.SetUint64(i[0])
+	lo.SetUint64(i.lo)
 	b.Add(b, &lo)
 
 	if neg {
 		b.Xor(b, maxBigU128).Add(b, big1).Neg(b)
 	}
 	return b
+}
+
+func (i I128) String() string {
+	b := i.AsBigInt()
+	return b.String()
 }
