@@ -76,9 +76,14 @@ func main() {
 				arr, ok := it.Value[i].(xrg.ArrayType)
 				if ok {
 					fmt.Print(arr.Values)
-				} else {
-					fmt.Print(it.Value[i])
+					continue
 				}
+				i128, ok := it.Value[i].(xrg.I128)
+				if ok {
+					fmt.Print(i128)
+					continue
+				}
+				fmt.Print(it.Value[i])
 			}
 		}
 		fmt.Print("\n")
