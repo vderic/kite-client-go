@@ -4,34 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
-	"github.com/vderic/kite-client-go"
 	"github.com/vderic/kite-client-go/xrg"
 	"io"
-	"io/ioutil"
 	"os"
 	//"reflect"
 	"unsafe"
 )
 
 func main() {
-
-	// read schema in JSON file
-	jfile, err := os.Open("data/gpdb0.schema")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	bv, err := ioutil.ReadAll(jfile)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	var schema []kite.Coldef
-	json.Unmarshal(bv, &schema)
 
 	// read xrg file
 	file, err := os.Open("data/gpdb0_0.xrg")
