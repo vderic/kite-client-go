@@ -6,6 +6,8 @@ import (
 )
 
 const (
+	LO      = 0
+	HI      = 1
 	signBit = 0x8000000000000000
 )
 
@@ -20,13 +22,13 @@ type I128 struct {
 
 func (i I128) AsBigInt() (b *big.Int) {
 	b = new(big.Int)
-	neg := i.array[1]&signBit != 0
-	if i.array[1] > 0 {
-		b.SetUint64(i.array[1])
+	neg := i.array[HI]&signBit != 0
+	if i.array[HI] > 0 {
+		b.SetUint64(i.array[HI])
 		b.Lsh(b, 64)
 	}
 	var lo big.Int
-	lo.SetUint64(i.array[0])
+	lo.SetUint64(i.array[LO])
 	b.Add(b, &lo)
 
 	if neg {
@@ -41,5 +43,5 @@ func (i I128) String() string {
 }
 
 func (i I128) GetHiLo() (hi uint64, lo uint64) {
-	return i.array[1], i.array[0]
+	return i.array[HI], i.array[LO]
 }
