@@ -181,6 +181,12 @@ func (c *KiteClient) Submit() error {
 		if xrg.ValidateType(col.Type) == false {
 			return fmt.Errorf("invalid type in schema ", col)
 		}
+
+		if col.Type == "decimal" || col.Type == "decimal[]" {
+			if col.Precision == 0 || col.Scale == 0 {
+				return fmt.Errorf("invalid schema. decimal needs name, type, precision and scale")
+			}
+		}
 	}
 
 	if c.fragcnt <= 0 {
