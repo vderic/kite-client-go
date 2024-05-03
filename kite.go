@@ -88,7 +88,6 @@ func (c *KiteClient) Fragment(fragid, fragcnt int) *KiteClient {
 }
 
 func (c *KiteClient) FileSpec(fspec FileSpec) *KiteClient {
-
 	c.request.Spec = fspec
 	return c
 }
@@ -153,6 +152,10 @@ func (c *KiteClient) Submit() error {
 	var requests []Request
 
 	c.curr = nil
+
+	if len(c.request.Sql) == 0 {
+		return fmt.Errorf("invalid SQL statement")
+	}
 
 	if c.request.Spec.Validate() == false {
 		return fmt.Errorf("invalid file spec")
