@@ -7,4 +7,7 @@ require (
 	github.com/smallnest/epoller v1.2.0
 )
 
-require golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
+require (
+	github.com/shabbyrobe/go-num v0.0.0-20220218224608-bad1c8f534d7 // indirect
+	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
+)
