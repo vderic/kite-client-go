@@ -24,10 +24,7 @@ type CsvFileSpec struct {
 }
 
 func (s CsvFileSpec) Validate() bool {
-	if s.Fmt == "csv" {
-		return true
-	}
-	return false
+	return s.Fmt == "csv"
 }
 
 type ParquetFileSpec struct {
@@ -35,10 +32,7 @@ type ParquetFileSpec struct {
 }
 
 func (s ParquetFileSpec) Validate() bool {
-	if s.Fmt == "parquet" {
-		return true
-	}
-	return false
+	return s.Fmt == "parquet"
 }
 
 type Coldef struct {
