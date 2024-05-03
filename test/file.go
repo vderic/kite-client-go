@@ -62,6 +62,7 @@ func main() {
 		pint64off += 8
 	}
 
+	n := 0
 	it := xrg.NewIterator(vec)
 	for it.Next() {
 		for i := 0; i < it.Nvec; i++ {
@@ -76,6 +77,8 @@ func main() {
 			}
 		}
 		fmt.Print("\n")
+		n++
 	}
+	fmt.Println("#rows = ", n)
 
 }
