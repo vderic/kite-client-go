@@ -73,7 +73,12 @@ func main() {
 			if it.Flag[i] != 0 {
 				fmt.Print("NULL")
 			} else {
-				fmt.Print(it.Value[i])
+				v, ok := it.Value[i].(xrg.ArrayType)
+				if ok {
+					fmt.Print(v.Values)
+				} else {
+					fmt.Print(it.Value[i])
+				}
 			}
 		}
 		fmt.Print("\n")
