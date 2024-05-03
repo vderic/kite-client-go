@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	//"reflect"
-	"github.com/shabbyrobe/go-num"
 	"unsafe"
 )
 
@@ -77,13 +76,6 @@ func main() {
 				arr, ok := it.Value[i].(xrg.ArrayType)
 				if ok {
 					fmt.Print(arr.Values)
-				}
-
-				bi128, ok := it.Value[i].([]uint64)
-				if ok {
-					// int128
-					i128 := num.I128FromRaw(bi128[1], bi128[0])
-					fmt.Print(i128.String())
 				} else {
 					fmt.Print(it.Value[i])
 				}

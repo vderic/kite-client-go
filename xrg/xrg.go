@@ -403,7 +403,8 @@ func PointerGetValue(ptr uintptr, ptyp PhysicalType, ltyp LogicalType, itemsz in
 			} else {
 				p := (*uint64)(unsafe.Pointer(ptr))
 				i128 := unsafe.Slice(p, 2)
-				return i128, err
+				bint := I128ToBigInt(i128)
+				return bint, err
 			}
 		case XRG_PTYP_FP32:
 			fp32 := *(*float32)(unsafe.Pointer(ptr))
