@@ -167,7 +167,7 @@ func (c *KiteClient) Submit() error {
 
 	for _, col := range c.request.Schema {
 		if xrg.ValidateType(col.Type) == false {
-			return fmt.Errorf("invalid type in schema ", c)
+			return fmt.Errorf("invalid type in schema ", col)
 		}
 	}
 
